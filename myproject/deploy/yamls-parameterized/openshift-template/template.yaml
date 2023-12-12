@@ -1,0 +1,101 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: myproject-template
+  generatename: ""
+  namespace: ""
+  selflink: ""
+  uid: ""
+  resourceversion: ""
+  generation: 0
+  creationtimestamp: "0001-01-01T00:00:00Z"
+  deletiontimestamp: null
+  deletiongraceperiodseconds: null
+  labels: {}
+  annotations: {}
+  ownerreferences: []
+  finalizers: []
+  clustername: ""
+  managedfields: []
+objects:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      creationTimestamp: null
+      labels:
+        move2kube.konveyor.io/service: nodejs-webapp
+      name: nodejs-webapp
+    spec:
+      replicas: ${{COMMON_REPLICAS}}
+      selector:
+        matchLabels:
+          move2kube.konveyor.io/service: nodejs-webapp
+      strategy: {}
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            move2kube.konveyor.io/service: nodejs-webapp
+          name: nodejs-webapp
+        spec:
+          containers:
+            - image: index.docker.io/myproject/nodejs-webapp:latest
+              imagePullPolicy: Always
+              name: nodejs-webapp
+              ports:
+                - containerPort: 8080
+              resources: {}
+          imagePullSecrets:
+            - name: index-docker-io-imagepullsecret
+          restartPolicy: Always
+          securityContext: {}
+    status: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      creationTimestamp: null
+      labels:
+        move2kube.konveyor.io/service: nodejs-webapp
+      name: nodejs-webapp
+    spec:
+      ports:
+        - name: port-8080
+          port: 8080
+          targetPort: 8080
+      selector:
+        move2kube.konveyor.io/service: nodejs-webapp
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    data:
+      .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJpbmRleC5kb2NrZXIuaW8iOiB7CgkJCSJhdXRoIjogImEyOXlhV1pwWTJZNmEyOXlhV1pwWTJZPSIKCQl9Cgl9Cn0=
+    kind: Secret
+    metadata:
+      creationTimestamp: null
+      name: index-docker-io-imagepullsecret
+    type: kubernetes.io/dockerconfigjson
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      creationTimestamp: null
+      labels:
+        move2kube.konveyor.io/service: myproject
+      name: myproject
+    spec:
+      rules:
+        - host: myproject.com
+          http:
+            paths:
+              - backend:
+                  service:
+                    name: nodejs-webapp
+                    port:
+                      name: port-8080
+                path: /nodejs-webapp
+                pathType: Prefix
+    status:
+      loadBalancer: {}
+parameters:
+  - name: COMMON_REPLICAS
+    value: "2"

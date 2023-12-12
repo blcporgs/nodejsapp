@@ -1,0 +1,5 @@
+resources:
+  - index-docker-io-imagepullsecret-secret.yaml
+  - myproject-ingress.yaml
+  - nodejs-webapp-deployment.yaml
+  - nodejs-webapp-service.yaml

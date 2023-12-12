@@ -1,0 +1,8 @@
+version: "3.5"
+services:
+  nodejs-webapp:
+    container_name: nodejs-webapp
+    image: index.docker.io/myproject/nodejs-webapp:latest
+    ports:
+      - target: 8080
+        published: 8080
